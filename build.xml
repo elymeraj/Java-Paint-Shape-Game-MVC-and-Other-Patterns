@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JeuMemorisation" default="dist" basedir=".">
+    <description>
+        Build Ant compatible tous systèmes (macOS/Linux/Windows) et toutes versions Java (8+)
+    </description>
+
+    <!-- Définition des répertoires -->
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="doc.dir" location="doc"/>
+    <property name="main.class" value="MainMemory"/>
+
+    <!-- Nettoyage -->
+    <target name="clean" description="Supprime les anciens fichiers compilés">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${doc.dir}"/>
+
+        <delete>
+            <fileset dir="${src.dir}" includes="**/*.class"/>
+        </delete>
+    </target>
+
+    <!-- Préparation des dossiers -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${doc.dir}"/>
+    </target>
+
+    <!-- Compilation -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" encoding="UTF-8" />
+        <!-- Copie des images -->
+        <copy todir="${build.dir}/vue">
+            <fileset dir="${src.dir}/vue" includes="*.png"/>
+        </copy>
+    </target>
+
+    <!-- JavaDoc -->
+    <target name="javadoc" depends="compile">
+        <javadoc sourcepath="${src.dir}" destdir="${doc.dir}" packagenames="*" />
+    </target>
+
+    <!-- Création du JAR -->
+    <target name="dist" depends="compile,javadoc">
+        <jar jarfile="${dist.dir}/jeu-memoire.jar" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+        <!-- Copie des images aussi dans dist pour usage hors jar -->
+        <mkdir dir="${dist.dir}/vue"/>
+        <copy todir="${dist.dir}/vue">
+            <fileset dir="${src.dir}/vue" includes="*.png"/>
+        </copy>
+    </target>
+
+    <!-- Lancement direct -->
+    <target name="run" depends="dist">
+        <java jar="${dist.dir}/jeu-memoire.jar" fork="true"/>
+    </target>
+</project>
